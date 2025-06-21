@@ -90,10 +90,11 @@ def main():
         next_row = next_generation(history[-1])
         history.append(next_row)
     
-    # View position for panning
-    view_x = 0
-    view_y = 0
-      # For handling mouse drag and zoom
+    # View position for panning - initialize to center on the seed cell
+    view_x = max(0, (GRID_WIDTH // 2 * INITIAL_CELL_SIZE) - (WIDTH // 2))
+    view_y = 0  # Start from the top to see the evolution
+    
+    # For handling mouse drag and zoom
     dragging = False
     prev_mouse_pos = (0, 0)
     cell_size = INITIAL_CELL_SIZE
