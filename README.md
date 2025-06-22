@@ -59,14 +59,6 @@ Formato del archivo generado:
 [secuencia de 0s y 1s]
 ```
 
-## Conceptos Técnicos
-
-### Backbone (Columna Vertebral)
-El "backbone" del autómata se refiere a la columna central que se forma cuando se evoluciona el sistema desde una única célula activa. Esta secuencia tiene propiedades matemáticas interesantes y ha sido objeto de estudio en teoría de la complejidad.
-
-### Comportamiento Caótico
-La Regla 30 exhibe comportamiento caótico a pesar de su simplicidad. Stephen Wolfram la ha estudiado extensamente como ejemplo de cómo reglas locales simples pueden generar complejidad global.
-
 ## Requisitos
 
 - Python 3.x
@@ -79,13 +71,6 @@ La Regla 30 exhibe comportamiento caótico a pesar de su simplicidad. Stephen Wo
 2. Instala las dependencias: `pip install pygame numpy`
 3. Ejecuta el programa: `python practica2.py`
 
-## Implementación
-
-El programa utiliza:
-- **Pygame**: Para la visualización gráfica y manejo de eventos
-- **NumPy**: Para el procesamiento eficiente de los arrays del autómata
-- **Datetime**: Para generar timestamps en los archivos guardados
-
 ---
 
-Proyecto desarrollado como práctica para el curso de Sistemas Complejos.
+Proyecto desarrollado como práctica para el curso de Sistemas Complejos del semestre 2025/2.
