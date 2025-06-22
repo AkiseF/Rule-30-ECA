@@ -1,6 +1,8 @@
 import pygame
 import numpy as np
 import sys
+import os
+from datetime import datetime
 
 # Inicializar pygame
 pygame.init()
@@ -139,6 +141,51 @@ def draw_cells(history, view_x, view_y, cell_size, show_backbone_only=False, aut
         screen.blit(auto_box_surface, (auto_box_rect.x, auto_box_rect.y))
         screen.blit(auto_text, (auto_box_rect.x + padding, auto_box_rect.y + padding))
 
+# Función para guardar el backbone en un archivo
+def save_backbone(history):
+    # Crear directorio para guardar los archivos si no existe
+    save_dir = "backbone_data"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
+    # Generar nombre de archivo con marca de tiempo
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = os.path.join(save_dir, f"backbone_{timestamp}.txt")
+    
+    # Obtener la columna del backbone
+    backbone_col = GRID_WIDTH // 2
+    
+    # Abrir archivo y escribir los valores del backbone
+    with open(filename, 'w') as f:
+        f.write(f"# Backbone del Autómata Celular Regla 30 - {timestamp}\n")
+        f.write(f"# Total generaciones: {len(history)}\n")
+        f.write("# Formato: 1 = célula activa, 0 = célula inactiva\n\n")
+        
+        # Guardar cada generación del backbone
+        for i, row in enumerate(history):
+            f.write(f"Generación {i}: {row[backbone_col]}\n")
+    
+    return filename
+
+def show_save_message(message):
+    # Crear texto
+    save_text = font.render(message, True, BLACK)
+    text_width, text_height = save_text.get_size()
+    
+    # Crear un fondo semi-transparente para mejor visibilidad
+    padding = 10  # Relleno alrededor del texto
+    box_rect = pygame.Rect(WIDTH // 2 - text_width // 2 - padding, HEIGHT - text_height - padding*2 - 10, 
+                          text_width + padding*2, text_height + padding*2)
+    
+    # Dibujar el recuadro de fondo
+    box_surface = pygame.Surface((box_rect.width, box_rect.height), pygame.SRCALPHA)
+    box_surface.fill((240, 240, 240, 230))  # Gris claro con ligera transparencia
+    pygame.draw.rect(box_surface, BLACK, box_surface.get_rect(), 2)  # Borde
+    screen.blit(box_surface, (box_rect.x, box_rect.y))
+    
+    # Dibujar el texto sobre el recuadro
+    screen.blit(save_text, (box_rect.x + padding, box_rect.y + padding))
+
 def main():
     # Inicializar la cuadrícula
     history = initialize_grid()
@@ -162,6 +209,10 @@ def main():
     auto_scroll = False  # Indicador para desplazamiento automático
     auto_scroll_speed = 2  # Píxeles por frame para desplazarse
     
+    # Variable para almacenar el mensaje de guardado
+    save_message = ""
+    save_message_time = 0
+    
     # Bucle principal del juego
     running = True
     clock = pygame.time.Clock()
@@ -180,6 +231,10 @@ def main():
                     auto_scroll_speed = min(10, auto_scroll_speed + 1)                
                 elif event.key == pygame.K_DOWN:  # Disminuir velocidad de desplazamiento
                     auto_scroll_speed = max(1, auto_scroll_speed - 1)
+                elif event.key == pygame.K_s:  # Guardar backbone con la tecla 'S'
+                    filename = save_backbone(history)
+                    save_message = f"Backbone guardado en: {filename}"
+                    save_message_time = pygame.time.get_ticks()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Botón izquierdo del ratón
                     dragging = True
@@ -244,9 +299,7 @@ def main():
                     view_x = max(0, min(view_x, max_x if max_x > 0 else 0))
                     view_y = max(0, min(view_y, max_y if max_y > 0 else 0))
                     
-                    prev_mouse_pos = event.pos
-                    
-        # Manejar el desplazamiento automático
+                    prev_mouse_pos = event.pos        # Manejar el desplazamiento automático
         if auto_scroll:
             # Mover la posición de vista automáticamente hacia abajo
             view_y += auto_scroll_speed
@@ -264,8 +317,13 @@ def main():
                 next_row = next_generation(history[-1])
                 history.append(next_row)
         
-        # Dibujar el estado actual con el tamaño actual de célula
+        # Dibujar el estado actual with el tamaño actual de célula
         draw_cells(history, view_x, view_y, cell_size, show_backbone_only, auto_scroll)
+        
+        # Mostrar mensaje de guardado si es necesario
+        current_time = pygame.time.get_ticks()
+        if save_message and current_time - save_message_time < 3000:  # Mostrar durante 3 segundos
+            show_save_message(save_message)
         
         # Actualizar la pantalla
         pygame.display.flip()
