@@ -1,7 +1,7 @@
 # Rule-30-ECA
 Práctica 2 del curso Cellular Automata | Complex Systems
 
-Este proyecto implementa una visualización interactiva del Autómata Celular Elemental de la Regla 30, un sistema complejo que genera patrones fractales a partir de reglas simples.
+Este proyecto implementa una visualización interactiva del Autómata Celular Elemental de la Regla 30.
 
 ## Objetivos de la Práctica
 1. Calcular el mayor número de generaciones sin que las células de la frontera se acerquen. Utilizar cualquier método que ayude a resolver este problema.
