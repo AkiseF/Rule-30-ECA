@@ -24,6 +24,11 @@ pygame.display.set_caption("Rule 30 Cellular Automaton")
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)  # Color for the backbone
+
+# Font for the generation counter
+pygame.font.init()
+font = pygame.font.SysFont('Arial', 24)
 
 # Rule 30 function
 def apply_rule30(a, b, c):
@@ -51,7 +56,7 @@ def next_generation(current_row):
     return next_row
 
 # Draw the cells on the screen
-def draw_cells(history, view_x, view_y, cell_size):
+def draw_cells(history, view_x, view_y, cell_size, show_backbone_only=False):
     screen.fill(WHITE)
     
     # Calculate visible cells based on current cell size
@@ -62,24 +67,66 @@ def draw_cells(history, view_x, view_y, cell_size):
     start_row = max(0, int(view_y / cell_size))
     end_row = min(len(history), start_row + visible_height + 1)
     
-    start_col = max(0, int(view_x / cell_size))
-    end_col = min(GRID_WIDTH, start_col + visible_width + 1)
+    # The central column (backbone)
+    backbone_col = GRID_WIDTH // 2
     
-    for y in range(start_row, end_row):
-        if y >= len(history):
-            break
-        
-        row = history[y]
-        for x in range(start_col, end_col):
-            if x >= len(row):
+    if show_backbone_only:
+        # Only display the backbone column
+        for y in range(start_row, end_row):
+            if y >= len(history):
                 break
-                
-            if row[x] == 1:
-                pygame.draw.rect(
-                    screen,
-                    BLACK,
-                    (x * cell_size - view_x, y * cell_size - view_y, cell_size, cell_size)
-                )
+            
+            row = history[y]
+            x = backbone_col
+            
+            # Check if the backbone column is visible
+            if x >= int(view_x / cell_size) and x < int(view_x / cell_size) + visible_width:
+                if row[x] == 1:
+                    pygame.draw.rect(
+                        screen,
+                        RED,  # Highlight the backbone in red
+                        (x * cell_size - view_x, y * cell_size - view_y, cell_size, cell_size)
+                    )
+    else:
+        # Display the full automaton
+        start_col = max(0, int(view_x / cell_size))
+        end_col = min(GRID_WIDTH, start_col + visible_width + 1)
+        
+        for y in range(start_row, end_row):
+            if y >= len(history):
+                break
+            
+            row = history[y]
+            for x in range(start_col, end_col):
+                if x >= len(row):
+                    break
+                    
+                if row[x] == 1:
+                    # Use red color for backbone cells, black for others
+                    cell_color = RED if x == backbone_col else BLACK
+                    
+                    pygame.draw.rect(
+                        screen,
+                        cell_color,
+                        (x * cell_size - view_x, y * cell_size - view_y, cell_size, cell_size)
+                    )
+    
+    # Display generation count with a background box
+    gen_text = font.render(f"Generation: {len(history)}", True, BLACK)
+    text_width, text_height = gen_text.get_size()
+    
+    # Create a semi-transparent background for better visibility
+    padding = 10  # Padding around the text
+    box_rect = pygame.Rect(5, 5, text_width + padding*2, text_height + padding*2)
+    
+    # Draw the background box
+    box_surface = pygame.Surface((box_rect.width, box_rect.height), pygame.SRCALPHA)
+    box_surface.fill((240, 240, 240, 230))  # Light gray with slight transparency
+    pygame.draw.rect(box_surface, BLACK, box_surface.get_rect(), 2)  # Border
+    screen.blit(box_surface, (box_rect.x, box_rect.y))
+    
+    # Draw the text over the box
+    screen.blit(gen_text, (box_rect.x + padding, box_rect.y + padding))
 
 def main():
     # Initialize the grid
@@ -99,6 +146,9 @@ def main():
     prev_mouse_pos = (0, 0)
     cell_size = INITIAL_CELL_SIZE
     
+    # Flag to toggle between full view and backbone-only view
+    show_backbone_only = False
+    
     # Main game loop
     running = True
     clock = pygame.time.Clock()
@@ -109,6 +159,8 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                elif event.key == pygame.K_b:  # Toggle backbone view with 'B' key
+                    show_backbone_only = not show_backbone_only
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     dragging = True
@@ -180,7 +232,7 @@ def main():
                 history.append(next_row)
         
         # Draw the current state with the current cell size
-        draw_cells(history, view_x, view_y, cell_size)
+        draw_cells(history, view_x, view_y, cell_size, show_backbone_only)
         
         # Update the display
         pygame.display.flip()
