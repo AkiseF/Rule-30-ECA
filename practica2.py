@@ -157,13 +157,13 @@ def save_backbone(history):
     
     # Abrir archivo y escribir los valores del backbone
     with open(filename, 'w') as f:
-        f.write(f"# Backbone del Autómata Celular Regla 30 - {timestamp}\n")
+        f.write(f"# Backbone del Automata Celular Regla 30 - {timestamp}\n")
         f.write(f"# Total generaciones: {len(history)}\n")
-        f.write("# Formato: 1 = célula activa, 0 = célula inactiva\n\n")
+        f.write("# Formato: 1 = celula viva, 0 = celula muerta\n\n")
         
-        # Guardar cada generación del backbone
-        for i, row in enumerate(history):
-            f.write(f"Generación {i}: {row[backbone_col]}\n")
+        # Guardar todas las generaciones como una secuencia de 0s y 1s 
+        backbone_sequence = ''.join(str(row[backbone_col]) for row in history)
+        f.write(backbone_sequence)
     
     return filename
 
